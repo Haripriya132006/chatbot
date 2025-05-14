@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot with PDF Viewer</title>
+    <style>
+body {
+    font-family: Arial, sans-serif;
+    font-size: 18px; /* Increased text size */
+    line-height: 1.6; /* Better spacing for readability */
+    background-color: #f4f4f4;
+    color: #333;
+    padding: 20px;
+}
+        .container {
+            display: flex;
+            width: 100%;
+        }
+        .chat-container, .pdf-container {
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #fff;
+            overflow-y: auto;
+        }
+        .chat-container {
+            width: 45%;
+        }
+        .pdf-container {
+            width: 50%;
+        }
+        .chat-box {
+            height: 500px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #fafafa;
+        }
+        .input-container {
+            display: flex;
+        }
+        .input-container input {
+            height: 20px;
+            width: 80%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .input-container button {
+            width: 20%;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .input-container button:hover {
+            background-color: #45a049;
+        }
+        .pdf-viewer {
+            width: 100%;
+            height: 500px;
+            border: none;
+        }
+
+        /* Teal block for Blackberry (bot) messages */
+        .bot-message {
+            background-color: #008080; /* Teal background */
+            color: white; /* White text color */
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 18px; /* Increased font size */
+            text-indent: 20px;
+        }
+
+        /* Lighter teal block for User messages */
+        .user-message {
+            background-color: #66b3b3; /* Lighter teal background */
+            color: white; /* White text color */
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 18px; /* Increased font size */
+            text-indent: 20px;
+        }
+
+        /* Loading Spinner */
+        #loading-spinner {
+            display: none;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        #loading-spinner img {
+            width: 50px;
+            
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="chat-container">
+            <h2>Chatbot</h2>
+            <div id="loading-spinner">
+                <img src="download.gif" alt="have some patience baby girl ..">
+            </div>
+            <div id="chat-box" class="chat-box"></div>
+            <div class="input-container">
+                <input type="text" id="user-input" placeholder="Type a message...">
+                <button id="send-btn">Send</button>
+            </div>
+        </div>
+        <div class="pdf-container">
+            <h2>PDF Viewer</h2>
+            <embed id="pdf-viewer" class="pdf-viewer" src="" type="application/pdf">
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('send-btn').onclick = function() {
+            let userMessage = document.getElementById('user-input').value;
+            if (userMessage) {
+                addUserMessage(userMessage);
+                document.getElementById('user-input').value = '';
+
+                // Show loading spinner while waiting for response
+                document.getElementById('loading-spinner').style.display = 'block';
+
+                fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'message=' + encodeURIComponent(userMessage)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    addBotMessage(data.response);
+
+                    // Hide loading spinner when the response is received
+                    document.getElementById('loading-spinner').style.display = 'block';
+
+                    document.getElementById('loading-spinner').style.display = 'none';
+
+                    if (data.file_to_open) {
+                        document.getElementById('pdf-viewer').src = `/files/${data.file_to_open}`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('loading-spinner').style.display = 'none'; // Hide spinner in case of error
+                });
+            }
+        };
+
+        function addUserMessage(message) {
+            const chatBox = document.getElementById('chat-box');
+            const messageElement = document.createElement('p');
+            messageElement.textContent = 'You: ' + message;
+            messageElement.classList.add('user-message'); // Apply the user-message class for styling
+            chatBox.appendChild(messageElement);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function addBotMessage(message) {
+            const chatBox = document.getElementById('chat-box');
+            const messageElement = document.createElement('p');
+            messageElement.innerHTML = 'Blackberry: ' + message;
+            messageElement.classList.add('bot-message'); // Apply the bot-message class for styling
+            chatBox.appendChild(messageElement);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            // Add event listener for links in the bot's message
+            const links = messageElement.querySelectorAll('a');
+            links.forEach(link => {
+                link.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    const pdfUrl = this.getAttribute('href');
+                    document.getElementById('pdf-viewer').src = pdfUrl;
+                });
+            });
+        }
+    </script>
+</body>
+</html>
