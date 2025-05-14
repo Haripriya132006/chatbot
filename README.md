@@ -1,8 +1,8 @@
-##🫐 Blackberry Chatbot
+🫐 Blackberry Chatbot
 =
 Blackberry is a multifunctional chatbot built using Flask, Hugging Face Transformers, spaCy, and PyMuPDF. It supports conversational interaction, PDF summarization, quiz generation from text, and file management features.
 
-##🚀 Features
+🚀 Features
 =
 🤖 Conversational Bot: Responds to greetings, simple commands, and custom phrases.
 📄 PDF Summarization: Extracts and summarizes content from uploaded PDF files using t5-small.
@@ -12,7 +12,7 @@ Blackberry is a multifunctional chatbot built using Flask, Hugging Face Transfor
 🧾 Memory-Based Summarization: Remembers previously summarized inputs to avoid redundant processing.
 🧪 Fallback OCR: Performs OCR if no text is found in a PDF (optional, integrate pytesseract).
 
-##🛠️ Tech Stack:
+🛠️ Tech Stack:
 =
 Flask - Lightweight web framework for Python
 spaCy - NLP for sentence parsing and keyword extraction
